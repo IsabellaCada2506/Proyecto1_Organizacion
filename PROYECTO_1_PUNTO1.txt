@@ -1,0 +1,35 @@
+CHIP PALABRAS{
+
+	IN x[16], y[16];
+	OUT It, eq, gt;
+
+	PARTS:
+	
+	Not16 (in=y, out=notDey);
+
+	Add16(a=notDey, b[0]=true, b[1.15]=false, out=negay);
+
+
+	// x + (-y)
+
+	Add16(a=x, b-negay, out=diff, out[15]-signo, out[0..7]=low, out[8..15]-high);
+
+
+	// Lógica para los que son equivalentes, contrarios 
+
+	Or8Way (in=alto, out=orbajo);
+	Or8way (in=alto, out=oralto);
+	or (a=orbajo, b=oralto,out=notEquiva);
+	Not (in=notEquiva, out=equiva);
+
+
+	// 4. x < y
+	And (a=sig, b-true, out=1t);
+
+	// 5. x==y
+	or (a=lt, b=eq, out=itoeq);
+	Not (in=itoeq, out=gt);
+
+
+}
+
