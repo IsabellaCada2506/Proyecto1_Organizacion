@@ -1,0 +1,27 @@
+
+CHIP ARITCONTROL {
+    IN x[16], y[16], op;
+    OUT out[16], ovf;
+
+PARTS:
+
+    Xor16(a=y, b[0]=op, b[1]=op, b[2]=op, b[3]=op,
+                b[4]=op, b[5]=op, b[6]=op, b[7]=op,
+                b[8]=op, b[9]=op, b[10]=op, b[11]=op,
+                b[12]=op, b[13]=op, b[14]=op, b[15]=op,
+          out=yMux);
+
+    Add16(a=x, b=yMux, out=sum);
+
+    Inc16(in=sum, out=sumFinal);
+
+    Mux16(a=sum, b=sumFinal, sel=op, out=out);
+
+    Xor(a=x[15], b=yMux[15], out=signDiff);
+    Not(in=signDiff, out=signEqual);
+    Xor(a=x[15], b=out[15], out=signChanged);
+    And(a=signEqual, b=signChanged, out=ovf);
+
+}
+
+
