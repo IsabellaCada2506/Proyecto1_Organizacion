@@ -1,0 +1,46 @@
+CHIP ALU {
+    IN  
+        x[16], y[16],      
+        zx, 
+        nx, 
+        zy, 
+        ny, 
+        f,  
+        no; 
+
+    OUT 
+        out[16], 
+        zr,      
+        ng;      
+
+    PARTS:
+    //  PROCESAMIENTO DE X 
+    Mux16(a=x, b=false, sel=zx, out=xAfterZx);
+    Not16(in=xAfterZx, out=notX);
+    Mux16(a=xAfterZx, b=notX, sel=nx, out=xFinal);
+
+    // PROCESAMIENTO DE Y
+    Mux16(a=y, b=false, sel=zy, out=yAfterZy);
+    Not16(in=yAfterZy, out=notY);
+    Mux16(a=yAfterZy, b=notY, sel=ny, out=yFinal);
+
+    // SELECCIÓN DE FUNCIÓN (f) 
+    Add16(a=xFinal, b=yFinal, out=addXY);
+    And16(a=xFinal, b=yFinal, out=andXY);
+
+    Mux16(a=andXY, b=addXY, sel=f, out=resultF);
+
+    //PROCESAMIENTO DE SALIDA
+    Not16(in=resultF, out=notResultF);
+    
+
+    // Extraemos el bit 15 para saber si es negativo (ng)
+    // Y dividimos la salida en dos partes de 8 bits para calcular 'zr' después
+    Mux16(a=resultF, b=notResultF, sel=no, out=out, out[15]=ng, out[0..7]=low8, out[8..15]=high8);
+
+    // CÁLCULO DE ZR
+    Or8Way(in=low8, out=orLow);
+    Or8Way(in=high8, out=orHigh);
+    Or(a=orLow, b=orHigh, out=notZero); 
+    Not(in=notZero, out=zr);            
+}
